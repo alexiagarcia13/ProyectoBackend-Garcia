@@ -1,0 +1,28 @@
+[
+    {
+      "code": "P001",
+      "name": "Texanas Feyre",
+      "price": 6990,
+      "description": "Texanas cana media, cuero genunino uruguayo.",
+      "thumbnail": "img/venta/texanas/feyre_choco.jpeg",
+      "stock": 10
+    },
+    {
+      "code": "P002",
+      "name": "Texanas Ela",
+      "price": 5500,
+      "description": "Texanas cana baja, cuero genunino uruguayo.",
+      "thumbnail": "img/venta/texanas/tex_ela_blanca.jpeg",
+      "stock": 5
+    },
+    {
+      "code": "P003",
+      "name": "Texanas Serena",
+      "price": 6990,
+      "description": "Texanas cana media, cuero genunino uruguayo.",
+      "thumbnail": "img/venta/texanas/tex_serena_camel.jpeg",
+      "stock": 8
+    }
+  ]
+
+ 
