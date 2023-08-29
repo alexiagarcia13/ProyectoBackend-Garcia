@@ -55,6 +55,16 @@ io.on('connection', (socket) => {
   });
 });
 
+// Rutas HTTP
+app.post('/createProduct', (req, res) => {
+  const productName = req.body.productName;
+  if (productName) {
+      // Emitir evento para agregar producto
+      io.emit('newProduct', { name: productName });
+  }
+  res.redirect('/realtimeproducts');
+});
+
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {

@@ -1,0 +1,53 @@
+<!-- realTimeProducts.handlebars -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-Time Products</title>
+</head>
+<body>
+    <h1>Real-Time Products</h1>
+    <ul id="productList">
+        <!-- Aquí se mostrarán los productos -->
+    </ul>
+
+    <form id="productForm">
+        <input type="text" id="productName" placeholder="Nombre del producto">
+        <button type="submit">Agregar Producto</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        socket.on('connect', () => {
+            console.log('Conectado al servidor WebSocket');
+        });
+
+        socket.on('productAdded', (product) => {
+            // Agregar el nuevo producto a la lista
+            const productList = document.getElementById('productList');
+            const li = document.createElement('li');
+            li.textContent = product.name;
+            productList.appendChild(li);
+        });
+
+        socket.on('productDeleted', (productId) => {
+            // Eliminar el producto de la lista
+            const productList = document.getElementById('productList');
+            const li = productList.querySelector(`li[data-id="${productId}"]`);
+            if (li) {
+                productList.removeChild(li);
+            }
+        });
+
+        document.getElementById('productForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const productName = document.getElementById('productName').value;
+            if (productName) {
+                //Emito evento para agregar producto
+                socket.emit('newProduct', { name: productName });
+            }
+        });
+    </script>
+</body>
+</html>
