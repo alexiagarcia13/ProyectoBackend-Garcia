@@ -4,11 +4,16 @@ const cartsRouter = require('./api/carts/router');
 const http = require('http');
 const socketIo = require('socket.io');
 const exphbs = require('express-handlebars');
+const fs = require('fs');
+
 
 const app = express();
 const port = 8080;
 const server = http.createServer(app);
 const io = socketIo(server);
+// Cargar los datos de productos.json
+const productsData = fs.readFileSync('productos.json', 'utf8');
+const products = JSON.parse(productsData);
 
 app.use(express.json());
 
