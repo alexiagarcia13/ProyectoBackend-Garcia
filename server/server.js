@@ -4,16 +4,18 @@ const cartsRouter = require('./api/carts/router');
 const http = require('http');
 const socketIo = require('socket.io');
 const exphbs = require('express-handlebars');
+const mongoose = require('mongoose');
 const fs = require('fs');
 
+mongoose.connect('TU_URI_DE_CONEXIÓN', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const app = express();
 const port = 8080;
 const server = http.createServer(app);
 const io = socketIo(server);
-// Cargar los datos de productos.json
-const productsData = fs.readFileSync('productos.json', 'utf8');
-const products = JSON.parse(productsData);
+
+// Manejo de modelos de Mongoose
+const Product = require('./dao/models/products');
 
 app.use(express.json());
 
@@ -31,13 +33,25 @@ app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
 });
 
-
-app.get('/', (req, res) => {
-  res.render('home', { products: getAllProducts() });
+// Cargar los datos de productos desde MongoDB usando Mongoose
+app.get('/', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.render('home', { products: products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al obtener los productos.');
+  }
 });
 
-app.get('/realtimeproducts', (req, res) => {
-  res.render('realTimeProducts', { products: getAllProducts() });
+app.get('/realtimeproducts', async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.render('realTimeProducts', { products: products });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al obtener los productos.');
+  }
 });
 
 // WebSocket
@@ -45,27 +59,41 @@ io.on('connection', (socket) => {
   console.log('Cliente conectado por WebSocket');
 
   socket.on('disconnect', () => {
-      console.log('Cliente desconectado por WebSocket');
+    console.log('Cliente desconectado por WebSocket');
   });
 
   // Escuchar eventos personalizados
-  socket.on('newProduct', (product) => {
-      addProduct(product);
-      io.emit('productAdded', product);
+  socket.on('newProduct', async (product) => {
+    try {
+      const newProduct = new Product(product);
+      await newProduct.save();
+      io.emit('productAdded', newProduct);
+    } catch (error) {
+      console.error(error);
+    }
   });
 
-  socket.on('deleteProduct', (productId) => {
-      deleteProduct(productId);
+  socket.on('deleteProduct', async (productId) => {
+    try {
+      await Product.findByIdAndRemove(productId);
       io.emit('productDeleted', productId);
+    } catch (error) {
+      console.error(error);
+    }
   });
 });
 
 // Rutas HTTP
-app.post('/createProduct', (req, res) => {
+app.post('/createProduct', async (req, res) => {
   const productName = req.body.productName;
   if (productName) {
-      // Emitir evento para agregar producto
-      io.emit('newProduct', { name: productName });
+    try {
+      const newProduct = new Product({ name: productName });
+      await newProduct.save();
+      io.emit('newProduct', newProduct);
+    } catch (error) {
+      console.error(error);
+    }
   }
   res.redirect('/realtimeproducts');
 });
